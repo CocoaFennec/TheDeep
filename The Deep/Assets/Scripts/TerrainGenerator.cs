@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+[RequireComponent(typeof(MeshFilter))]
 public class TerrainGenerator : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -15,6 +17,14 @@ public class TerrainGenerator : MonoBehaviour
         coordinates[2] = new Vector2(4, 2);
         coordinates[3] = new Vector2(6, 3);
         coordinates[4] = new Vector2(8, 1);
+
+
+        GetComponent<MeshFilter>().mesh = GenerateMesh(coordinates);
+    }
+
+    Mesh GenerateMesh(Vector2[] coordinates)
+    {
+        Mesh mesh = new Mesh();
 
         // Sets up required things for mesh
         Vector3[] vertices = new Vector3[40];
@@ -71,16 +81,64 @@ public class TerrainGenerator : MonoBehaviour
 
         vertices = vertices.Distinct().ToArray();
 
-        foreach (Vector3 vertex in vertices)
-        {
-            Debug.Log(vertex.x);
-            Debug.Log(vertex.y);
-        }
-    }
+        coordinateIndex = 0;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        while (coordinateIndex < coordinates.Length - 1)
+        {
+            // Adds current coordinate to triangles array
+            triangles[triangleIndex] = Array.IndexOf(vertices, coordinates[coordinateIndex]);
+            triangleIndex += 1;
+            // Adds next coordinate to triangles array
+            triangles[triangleIndex] = Array.IndexOf(vertices, coordinates[coordinateIndex + 1]);
+            triangleIndex += 1;
+            // Adds third connecting point to triangles array
+            // as well as the square underneath the triangle
+            if (coordinates[coordinateIndex].y < coordinates[coordinateIndex + 1].y)
+            {
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex + 1].x, coordinates[coordinateIndex].y));
+                triangleIndex += 1;
+
+                triangles[triangleIndex] = Array.IndexOf(vertices, coordinates[coordinateIndex]);
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex + 1].x, coordinates[coordinateIndex].y));
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex].x, 0));
+                triangleIndex += 1;
+
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex + 1].x, coordinates[coordinateIndex].y));
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex + 1].x, 0));
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex].x, 0));
+                triangleIndex += 1;
+            }
+            else if (coordinates[coordinateIndex].y > coordinates[coordinateIndex + 1].y)
+            {
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex].x, coordinates[coordinateIndex + 1].y));
+                triangleIndex += 1;
+
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex].x, coordinates[coordinateIndex + 1].y));
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, coordinates[coordinateIndex + 1]);
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex].x, 0));
+                triangleIndex += 1;
+
+                triangles[triangleIndex] = Array.IndexOf(vertices, coordinates[coordinateIndex + 1]);
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex + 1].x, 0));
+                triangleIndex += 1;
+                triangles[triangleIndex] = Array.IndexOf(vertices, new Vector2(coordinates[coordinateIndex].x, 0));
+                triangleIndex += 1;
+            }
+
+            coordinateIndex += 1;
+        }
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        //mesh.uv = uv;
+
+        return mesh;
     }
 }
