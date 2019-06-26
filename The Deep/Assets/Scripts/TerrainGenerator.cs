@@ -21,6 +21,7 @@ public class TerrainGenerator : MonoBehaviour
         // Generates the mesh
         GetComponent<MeshFilter>().mesh = GenerateMesh(coordinates);
 
+        // Sets the height of the surface
         foreach(Vector2 coordinate in coordinates)
         {
             if (coordinate.y > gameController.seaLevel)
