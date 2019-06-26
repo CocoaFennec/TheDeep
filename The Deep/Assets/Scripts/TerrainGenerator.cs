@@ -7,25 +7,41 @@ using System.Linq;
 [RequireComponent(typeof(MeshFilter))]
 public class TerrainGenerator : MonoBehaviour
 {
+    GameController gameController;
+
     // Start is called before the first frame update
     void Start()
     {
+        // Defines the GameController Object
+        gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+
         // Defines the coordinates of the sample terrain
         Vector2[] coordinates = GenerateCoordinates();
 
+        // Generates the mesh
         GetComponent<MeshFilter>().mesh = GenerateMesh(coordinates);
+
+        foreach(Vector2 coordinate in coordinates)
+        {
+            if (coordinate.y > gameController.seaLevel)
+            {
+                gameController.seaLevel = coordinate.y;
+            }
+        }
     }
 
     Vector2[] GenerateCoordinates()
     {
         Vector2[] coordinates = new Vector2[100];
+
         coordinates[0] = new Vector2(-8, 4.6f);
         for (int x = -6; x <= 6; x++)
         {
             coordinates[Array.IndexOf(coordinates, new Vector2(0, 0))] = new Vector2(x, Mathf.Pow(x, 2.0f) / 10 + 1);
         }
         coordinates[Array.IndexOf(coordinates, new Vector2(0, 0))] = new Vector2(8, 4.6f);
-        Array.Resize(ref coordinates, Array.IndexOf(coordinates, new Vector2(0,0)));
+        Array.Resize(ref coordinates, Array.IndexOf(coordinates, new Vector2(0,0))); 
+
         return coordinates;
     }
 
